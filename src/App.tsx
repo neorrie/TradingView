@@ -2,7 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { parseCSV } from "./utilities/parseCSV";
 import { createChart, CandlestickSeries } from "lightweight-charts";
 
+type BarData = {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  time: string;
+};
+
 function App() {
+  //parse CSV
   useEffect(() => {
     fetch("/trade_log.csv")
       .then((res) => res.text())
@@ -15,14 +24,6 @@ function App() {
 
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const [candlePrice, setCandlePrice] = useState<BarData | null>(null);
-
-  type BarData = {
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    time: string;
-  };
 
   useEffect(() => {
     if (chartContainerRef.current) {
@@ -51,6 +52,7 @@ function App() {
         timeVisible: true,
       });
 
+      // data goes here
       const candlestickData = [
         {
           time: "2018-10-19",
@@ -1098,6 +1100,7 @@ function App() {
       ];
       newSeries.setData(candlestickData);
 
+      // hover
       chart.subscribeCrosshairMove((param) => {
         const data = param.seriesData.get(newSeries);
         if (data !== undefined) {
