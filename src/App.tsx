@@ -1,6 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { parseCSV } from "./utilities/parseCSV";
-import { ColorType, createChart, CandlestickSeries } from "lightweight-charts";
+import { createChart, CandlestickSeries } from "lightweight-charts";
 
 function App() {
   useEffect(() => {
@@ -14,6 +14,16 @@ function App() {
   }, []);
 
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  const [candlePrice, setCandlePrice] = useState<BarData | null>(null);
+
+  type BarData = {
+    open: number;
+    high: number;
+    low: number;
+    close: number;
+    time: string;
+  };
+
   useEffect(() => {
     if (chartContainerRef.current) {
       const chart = createChart(chartContainerRef.current, {
@@ -41,7 +51,7 @@ function App() {
         timeVisible: true,
       });
 
-      const data = [
+      const candlestickData = [
         {
           time: "2018-10-19",
           open: 180.34,
@@ -1086,7 +1096,16 @@ function App() {
           close: 193.59,
         },
       ];
-      newSeries.setData(data);
+      newSeries.setData(candlestickData);
+
+      chart.subscribeCrosshairMove((param) => {
+        const data = param.seriesData.get(newSeries);
+        if (data !== undefined) {
+          setCandlePrice(data as BarData);
+        } else {
+          setCandlePrice(null);
+        }
+      });
 
       return () => chart.remove();
     }
@@ -1097,6 +1116,12 @@ function App() {
       <h1>Trading Dashboard</h1>
       <div ref={chartContainerRef}></div>
       <div>Lightweight Charts</div>
+      <div>
+        <div>OPEN: {candlePrice?.open}</div>
+        <div>HIGH: {candlePrice?.high}</div>
+        <div>LOW: {candlePrice?.low}</div>
+        <div>CLOSE: {candlePrice?.close}</div>
+      </div>
     </div>
   );
 }
